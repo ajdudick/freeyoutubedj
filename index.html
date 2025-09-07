@@ -405,8 +405,13 @@
   async function loadTo(side,id){
     if(!id){ setStatus(side,'Enter a valid YouTube URL or video ID.',true); return; }
     const d=deck[side]; d.id=id; d.title=''; updateTitles(); setStatus(side,'');
-    const wait=()=>{ if(!(window.YT&&d.player&&typeof d.player.loadVideoById==='function')){ requestAnimationFrame(wait); return;} try{ d.player.loadVideoById({videoId:id,startSeconds:0,suggestedQuality:'large'});}catch{} };
+    // --------- CHANGED: auto-cue instead of auto-play ----------
+    const wait=()=>{
+      if(!(window.YT&&d.player&&typeof d.player.cueVideoById==='function')){ requestAnimationFrame(wait); return;}
+      try{ d.player.cueVideoById({videoId:id,startSeconds:0,suggestedQuality:'large'});}catch{}
+    };
     wait();
+    // -----------------------------------------------------------
     const title=await fetchTitleOEmbed(id,side);
     if(title && d.id===id){ d.title=title; updateTitles(); setStatus(side,''); }
   }
